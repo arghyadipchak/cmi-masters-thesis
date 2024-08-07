@@ -1,0 +1,213 @@
+In this chapter, we explore how to optimally increase the capacities of the firms so that we can obstain a \textit{stable} and \textit{perfect} matching. We focus on two decision problems, namely \textsc{MinSum Cap Stable and Perfect} and \textsc{MinMax Cap Stable and Perfect} abbreviated as \MinSumSP and \MinMaxSP respectively.
+
+\section{MinSum Capacities}
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a capacity bound $ k^+ \in \mathbb{N}$
+\end{pinput}
+\begin{question}[\MinSumSP]
+  Is there a capacity increase vector $\vr$ with $|\vr|_1 \leq k^+$ st. $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching?
+\end{question}
+
+We call a capacity increase vector $\vr$ \textit{feasible} if it results in a solution and \textit{optimal} is $|\vr|_1$ is minimum among all feasible vectors. We also denote the minimum $|\vr|_1$, \ie the optimal capacity increase value by $OPT$.
+
+\subsection{Structural Properties}
+
+\begin{lemma}
+  \label{lem:weakly-prefers}
+  Let $I_1 = \left< W, F, \succ, \vq_1 \right>$ and $I_2 = \left< W, F, \succ, \vq_2 \right>$ denote two MM-instances with the same set of workers and firms, and the same preferences and priority lists such that $\vq_1 \leq \vq_2$. Then the following hold.
+
+  \renewcommand{\theenumi}{\roman{enumi}}
+  \begin{enumerate}
+    \item Every worker weakly prefers the worker-optimal stable matching $\mu_2$ in $I_2$ to the worker-optimal stable matching $\mu_1$ in $I_1$.
+    \item If a firm $f$ is under-filled in $\mu_1$, then $\mu_2^{-1}(f) \subseteq \mu_1^{-1}(f)$
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  For (i), note that the weakly preferring relation is transitive. So it suffices to consider the case where only unit capacity is added to exactly one firm, the outcome of which we have already seen in Corollary~\ref{coro:workers-never-worsen} (also shown by \Citeauthor{kominers2020respect} \cite{kominers2020respect}).
+
+  For (ii), for the sake of contradiction, suppose there exists a worker $w \in \mu_2^{-1} \setminus \mu_1^{-1}(f)$, then by (i), $\mu_2(w) \succ_w \mu_1(w)$. But $f$ is under-filled in $\mu_1$, and thus it forms a blocking pair with $w$ in $\mu_1$, a contradiction.
+\end{proof}
+
+\begin{algorithm}
+  \caption{Create $I^*(\vv)$ and $\mu^*_\vv$}
+  \label{algo:MinSumSP-Algorithm}
+  \begin{algorithmic}
+    \REQUIRE $\vv \in \mathcal{V}$, a MM Instance $I$ and the sets $W_a, W_u$ \textbf{Output:} $I^*(\vv), \mu^*_\vv$
+    \STATE Set $E = E' := {(w, f) | w \in A(f) \land f \in A(w)}$
+    \FOR{each firm $f \in F$}
+    \STATE $n(f, \vv) :=$ number of workers $\vv$ assigns to $f$
+    \STATE $\vq'[f] := \max \{ \vq[f] - n(f, \vv), 0 \}$
+    \ENDFOR
+    \FOR{$(w, f) \in E'$ with $w \in W_a$}
+    \IF{there is a $w' \in W_u$ st. $f \succ_{w'} \vv[w'] \land w' \succ_f w$}
+    \STATE Delete $(w, f)$ from $E'$
+    \ELSIF{there is a $w' \in W_u$ st. $\vv[w'] \succ_w f \land w \succ_{\vv[w']} w'$}
+    \STATE Delete $(w, f)$ from $E'$
+    \ENDIF
+    \ENDFOR
+    \IF{there is a $w \in W_u$ with no remaining incident edges in $E'$}
+    \RETURN "No $I^*(\vv)$ instance"
+    \ENDIF
+    \FOR{$x \in W_a \cup F$}
+    \STATE Set $\succ'_x$ to be the restriction of $\succ_x$ to their remaining partners in $W_a \cup F$
+    \ENDFOR
+    \STATE Set $I(\vv) := \left< W_a, F, \succ', \vq' \right>$
+    \STATE $\hat\mu_\vv :=$ worker-optimal stable matching of $I(\vv)$
+    \FOR{$w \in W_a$}
+    \STATE $wo(w, \vv) :=$ the worst remaining firm of $w$ in $I(\vv)$
+    \ENDFOR
+    \STATE $U(\vv) :=$ unmatched workers in $\hat\mu_\vv$
+    \STATE $n_u(f, \vv) := |\{ w \in U(\vv) ~|~ wo(w, \vv) = f|$
+    \FOR{for $w \in W$}
+    \IF{$w \in W_u$}
+    \STATE $\mu^*_\vv(w) := \vv[w]$
+    \ELSIF{$w \in U(\vv)$}
+    \STATE $\mu^*_\vv(w) := wo(w, \vv)$
+    \ELSE
+    \STATE $\mu^*_\vv(w) := \hat\mu_\vv(w)$
+    \ENDIF
+    \ENDFOR
+    \FOR{$f \in F$}
+    \STATE $\vq^*[f] := \max\{ n(f, \vv) + |\hat\mu_\vv(f)| + n_u(f, \vv), \vq[f] \}$
+    \ENDFOR
+    \RETURN $I^*(\vv) := \left< W, F, \succ, \vq^* \right>, \mu^*_\vv$
+  \end{algorithmic}
+\end{algorithm}
+
+Given a MM Instance $I$, let $\hat\mu$ be the worker-optimal stable matching. Consider all possible vectors $\vv$, whose coordinates are the unassigned workers and for each coordinate $w \in W_u$, the entry is an acceptable firm for the unassigned worker ($\vv[w] \in A(w)$). Denote the set of such vectors by $\mathcal{V}$. Now, if we create $I^*(\vv)$ and $\mu^*_\vv$ using \autoref{algo:MinSumSP-Algorithm}, we have the following lemma:
+
+\begin{lemma}[\cite{chen2024optimal}]
+  \label{lem:unassigned-vectors}
+  Let $\mathcal{V}' \subseteq \mathcal{V}$ be the set of those vectors $\vv$, such that $I^*(\vv)$ exists and $\mu^*_v$ is stable in $I^*(v)$. Then, the sum of values of an optimal capacity increase vector for \MinSumSP
+  $$OPT = \min\limits_{\vv \in \mathcal{V}'} \left\{ \sum\limits_{f \in F} (n(f, \vv) + |\hat{\mu}_v(f)| + n_u(f, \vv) - q[f])^+ \right\}$$
+\end{lemma}
+
+\subsection{Hardness Results}
+
+Given any capacity increase vector $\vr$, whether $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching can be checked in linear time using the \textit{Gale-Shapley} algorithm. Hence, \MinSumSP is contained in NP.
+
+\begin{theorem}
+  \label{th:MinSumSP-NP-complete}
+  \MinSumSP is NP-complete; hardness remains even if $q = 1^m$, $\Delta_W \leq 4$, $\Delta_u = 2$ and $\Delta_F = 3$. If $\Delta_u \leq 1$ or $\Delta_F \leq 2$ then \MinSumSP~ becomes polynomial-time solvable.
+\end{theorem}
+
+\begin{proof}
+  For the polynomial results, consider $\Delta_u \leq 1$, then there is just one possible assignment vector for the unassigned workers, and by Lemma \ref{lem:unassigned-vectors} the problem can be solved in polynomial time.
+
+  Next, assume that $\Delta_F \leq 2$. Since every firm has atleast one seat, it must be assigned atleast one worker in every initial stable matching as otherwise by Lemma \ref{lem:weakly-prefers} (ii) we can ignore such firms. Thus if an unassigned worker is assigned to a firm, it already has an initially assigned worker, and no other assigned or unassigned worker would have a justified envy. Hence, each assignment vector corresponds to a good capacity increase vector and we only need to check whether $k^+ \geq |W_{un}|$.
+
+  Now for the hardness result we have a reduction from the NP-complete \textsc{Vertex Cover} problem \cite{chen2024optimal}
+\end{proof}
+
+\begin{theorem}
+  \MinSumSP does not have any constant-factor approximation algorithm unless P=NP. This holds even if the preference and priority lists are derived from a master list
+\end{theorem}
+
+\begin{proof}
+  We have a reduction from the NP-hard \textsc{Set Cover} problem \cite{chen2024optimal}
+\end{proof}
+
+\begin{theorem}
+  \MinSumSP is $W[1]$-hard wrt. the capacity bound $k^+$
+\end{theorem}
+
+\begin{proof}
+  We have a parameterized reduction from the \textsc{Multi-Colored Clique} problem, which is $W[1]$-hard wrt. the solution size $h$ \cite{chen2024optimal}
+\end{proof}
+
+\subsection{Algorithmic Results}
+
+\begin{table}
+  \centering
+  \begin{tabular}{rl}
+    $\min \sum\limits_{f \in F} r_f$                                                                                        & subject to             \\
+    $|W| \cdot \sum\limits_{f' | f' \succeq_w f} x_{(w, f')} + \sum\limits_{w' | w' \succ_f w} x_{(w', f)} \geq q[f] + r_f$ & $\forall (w, f) \in E$ \\
+    $\sum\limits_{f \in A(w)} x_{(w, f)} = 1$                                                                               & $\forall w \in W$      \\
+    $\sum\limits_{w \in A(f)} x_{(w, f)} \leq q[f] + r_f$                                                                   & $\forall f \in F$      \\
+    $x_{(w, f)} \in \{0, 1\}$                                                                                               & $\forall (w, f) \in E$ \\
+    $r_f \in \mathbb{N}$                                                                                                    & $\forall f \in F$
+  \end{tabular}
+  \caption{IP formulation for \MinSumSP}
+  \label{tab:ip-minsumsp}
+\end{table}
+
+First, \autoref{tab:ip-minsumsp} gives us an an Integer Programming formulation for \MinSumSP.
+
+\begin{lemma}[\cite{chen2024optimal}]
+  The optimal solution to the Integer Program in \autoref{tab:ip-minsumsp} gives an optimal solution for \MinSumSP
+\end{lemma}
+
+Next, based on Lemma~\ref{lem:unassigned-vectors}, we have a simple greedy approximation algorithm.
+
+\begin{algorithm}
+  \caption{$|W_u|$-approximation}
+  \label{algo:MinSumSP-Approx}
+  \begin{algorithmic}
+    \REQUIRE MM Instance $I$
+    \STATE $\mu := \phi$
+    \STATE $L := W_u = $ set of unmatched workers in the worker-optimal stable matching
+    \STATE Delete the workers $w \in W_u$ from $I$
+    \WHILE{$L \neq \phi$}
+    \STATE Choose the next (at most) $c$ workers in $L$, add them to $I$ and define $\mathcal{V}$ as in Lemma~\ref{lem:unassigned-vectors}
+    \FOR{all $\vv \in \mathcal{V}$}
+    \STATE Compute $I^*(\vv)$ and $\mu^*_\vv$ using \autoref{algo:MinSumSP-Algorithm} if it exists
+    \ENDFOR
+    \STATE Let $\vv \in \mathcal{V}'$ be the vector where the smallest aggregate capacity increase is needed
+    \STATE Update the capacities according to $I^*(\vv)$
+    \STATE Set $I := I^*(\vv)$ and $\mu := \mu^*_\vv$
+    \ENDWHILE
+    \RETURN $\mu$
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}
+  \MinSumSP admits an $|W_u|$-approx. algorithm. Futhermore, it admits a polynomial time $\lceil |W_u/c| \rceil$-approx. algorithm for any constant $c$.
+\end{theorem}
+
+\begin{proof}
+  Fix a constant $c$, then in each iteration of the while loop, we choose at most $c$ unassigned workers. Thus $|\mathcal{V}| \leq \Delta_u^c$ and the running time is $\Delta_u^c \cdot O(|E|)$. Now there are at most $\lceil |W_u|/c \rceil$ iterations of the while loop, and in each iteration the additional number of seats required is at most $OPT$. Hence, the total capacity increase of the algorithm is at most $OPT \cdot \lceil |W_u|/c \rceil$ and we have a polynomial time $\lceil |W_u|/c \rceil$-approx. algorithm.
+\end{proof}
+
+Checking all possible assignment vectors gives up the following result:
+
+\begin{theorem}
+  \MinSumSP can be solved in $\Delta_u^{|W_u|} \cdot (n + m)^{O(1)}$ time and hence is FPT wrt. ($|W_u|, \Delta_u$).
+\end{theorem}
+
+\begin{proof}
+  From Lemma~\ref{lem:unassigned-vectors}, we know that to find the optimal capacity increase vector, it is enough to iterate over $\mathcal{V}$, compute $\mu^*_\vv$ if it exists and choose the best among the matchings that are stable. For each $\vv \in \mathcal{V}$, $n_u(\vv)$ can be computed in $O(|E|)$ time and $|\mathcal{V}| \leq \Delta_u^{|W_u|}$. Hence, we can iterate through all $\vv \in \mathcal{V}$ and find the optimal solution in time $O(\Delta_u^{|W_u|} \cdot |E|)$.
+\end{proof}
+
+\section{MinMax Capacities}
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a capacity bound $ k^{max} \in \mathbb{N}$
+\end{pinput}
+\begin{question}[\MinMaxSP]
+  Is there a capacity increase vector $\vr$ with $|\vr|_\infty \leq k^{max}$ st. $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching?
+\end{question}
+
+\begin{algorithm}
+  \caption{Algorithm for \MinMaxSP}
+  \label{algo:MinMaxSP-Algorithm}
+  \begin{algorithmic}
+    \REQUIRE MM Instance $I$
+    \STATE $r[f] := 0$ for all $f \in F$
+    \STATE $\mu :=$ worker-optimal stable matching
+    \WHILE{$\mu$ does not match all workers}
+    \STATE $r[f] = r[f] + 1$
+    \STATE $\mu :=$ worker-optimal stable matching with capacities $q + r$
+    \ENDWHILE
+    \RETURN $\mu$
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}
+  \MinMaxSP can be solved, and the corresponding student-optimal stable and perfect matching can be found, in polynomial time.
+\end{theorem}
+
+\begin{proof}
+  From Lemma~\ref{lem:weakly-prefers} we know that increasing a firm's capacity weakly improves every worker's situation. Assume $r$ is the optimal capacity increase vector, with $|r|_\infty = k^{max}$, then if we have $r[f] = k^{max}$ for all $f \in F$, then the worker-optimal stable matching should match all workers and is best for the workers for any capacity increase vector with $|r|_\infty \leq k^{max}$. Hence, the algorithm finds the optimal $k^{max}$, and a corresponding worker-optimal stable matching.
+\end{proof}

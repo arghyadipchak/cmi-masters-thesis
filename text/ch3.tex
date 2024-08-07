@@ -1,0 +1,107 @@
+In this chapter, we explore how changing the capacity of a firm can affect the outcome of the firms and the workers, thus the set of stable matchings. Specifically, we consider \WPDA and \FPDA and ask if a firm can improve/worsen when a unit capacity is added to it. Similarly, we will ask whether all workers can improve or if some workers can worsen when a firm's capacity is increased. The results are summarized below:
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{R{5cm} Y Y}
+                             & \WPDA                                           & \FPDA                                           \\
+    \hline
+    Can the firm improve?    & Yes [Example~\ref{eg:agents-improve}]           & Yes [Example~\ref{eg:agents-improve}]           \\
+    Can the firm worsen?     & Yes [Example~\ref{eg:firms-worsen}]             & Yes            [Example~\ref{eg:firms-worsen}]  \\
+    Can all workers improve? & Yes [Example~\ref{eg:agents-improve}]           & Yes [Example~\ref{eg:agents-improve}]           \\
+    Can some worker worsen?  & No  [Corollary~\ref{coro:workers-never-worsen}] & No  [Corollary~\ref{coro:workers-never-worsen}] \\
+  \end{tabularx}
+  \caption{Effect of a firm's capacity increase on itself and the workers}
+  \label{tab:capacity-increase-trends}
+\end{table}
+
+Note that the impact of decreasing capacity of a firm can be readily inferred from \autoref{tab:capacity-increase-trends}. If increasing capacity can improve the firm's outcome, then descreasing its capacity is equivalent to going back from the new to the old instance, which make it worse off.
+
+\section{Can Firms and Workers Improve?}
+
+\begin{example}
+  \label{eg:agents-improve}
+  Consider an instance I with three workers $w_1, w_2, w_3$ and two firms $f_1, f_2$ with preferences:
+  \begin{center}
+    \begin{tabular}{c|c}
+      $w_1, w_2, w_3: f_1 \succ f_2$ & $f_1, f_2: w_1 \succ w_2 \succ w_3$
+    \end{tabular}
+  \end{center}
+
+  Both firms have unit capacity, \ie $\vq[f_1] = \vq[f_2] = 1$, then $I$ has a unique stable matching:
+  $$\mu_1 = \{ (w_1, f_1), (w_2, f_2) \}$$
+
+  Now suppose $I'$ is the instance obtained by adding unit capacity to firm $f_1, \ie \vq'[f_1] = 2$, then $I'$ also has a unique stable matching
+  $$\mu_2 = \{ (\{ w_1, w_2 \}, f_1), (w_3, f_2) \}$$
+\end{example}
+
+Observe that all workers $w_1, w_2, w_3$ as well as the firm $f_1$ that increased its capacity are better off under the new matching $\mu_2$, \ie they prefer $\mu_2$ over $\mu_1$. Furthermore, as $\mu_1$ and $\mu_2$ are the only stable matchings for their corresponding instances, the result holds under both \WPDA and \FPDA algorithms. Hence both the firm and all workers can improve on capacity increase.
+
+\section{Can Firms Worsen?}
+
+\begin{example}
+  \label{eg:firms-worsen}
+  Consider an instance $I$ with three workers $w_1, w_2, w_3$ and two firms $f_1, f_2$ with lexicographic preferences:
+  \begin{center}
+    \begin{tabular}{c|c}
+
+                                & $f_1: \{w_1, w_2, w_3\} \succ \{w_1, w_2\} \succ \{w_1, w_3\} \succ$ \\
+      $w_1: f_2 \succ f_1$      & $\{w_1\} \succ \{w_2, w_3\} \succ \{w_2\} \succ \{w_3\}$             \\
+      $w_2, w_3: f_1 \succ f_2$ & $f_2: \{w_1, w_2, w_3\} \succ \{w_2, w_3\} \succ \{w_1, w_3\} \succ$ \\
+                                & $\{w_3\} \succ \{w_1, w_2\} \succ \{w_2\} \succ \{w_1\}$
+    \end{tabular}
+  \end{center}
+  Each firm has unit capacity, $\ie \vq[f_1] = \vq[f_2] = 1$, then there is a unique stable matching for $I$:
+  $$\mu_1 = \{ (w_1, f_1), (w_3, f_2) \}$$
+
+  Now consider a new instance $I'$ derived from $I$ by increasing the capacity of firm $f_1$ by $1$, $\ie \vq'[f_1] = 2$, then the stable matchings for $I'$ are:
+  \begin{center}
+    \begin{tabular}{c}
+      $\mu_2: \{ (\{w_1, w_2\}, f_1), (w_3, f_2) \}$ \\
+      $\mu_3: \{ (\{w_2, w_3\}, f_1), (w_1, f_2) \}$
+    \end{tabular}
+  \end{center}
+  where $\mu_2$ and $\mu_3$ are respectively the firm-optimal and worker-optimal stable matchings for $I'$.
+
+  Next consider a new instance $I''$ derived from $I'$ by increasing the capacity of firm $f_2$ by $1$, $\ie \vq''[f_2] = 2$, then $\mu_3$ is the unique stable matching for $I''$.
+\end{example}
+
+Observe that firm $f_1$ prefers $\mu_1$ (unique and thus worker-optimal stable matching for $I$) over $\mu_3$ and firm $f_2$ prefers $\mu_2$ over $\mu_3$ (unique and thus firm-optimal stable matching for $I''$). Thus under both \WPDA and \FPDA algorithms, a firm (resp. $f_1$ and $f_2$) can worsen upon increasing its capacity.
+
+\newpage
+
+\begin{proposition}[\cite{konishi2006games}]
+  Let $\mu$ and $\mu'$ denote the worker-optimal stable matching before and after a firm $f$ with strongly monotone preference increases its capacity by $1$. Then $\mu'(f) \succeq_f \mu(f)$
+\end{proposition}
+
+We can show that the number of workers matched with a firm $f$ cannot decrease upon capacity increase. We can also show that if the number of workers matched with a firm $f$ does not change, then set of set of workers matched with $f$ also remains the same. Thus, for a firm's outcome to change, it must be matched with strictly more workers in the new matching, and under strong monotonicity it will strictly prefer the new outcome. Thus under \WPDA algorithm, a firm with stronly monotone preferences cannot worsen upon increasing its capacity.
+
+\begin{example}
+  Consider an instance $I$ with two workers $w_1, w_2$ and two firms $f_1, f_2$ with strongly monotone preferences:
+  \begin{center}
+    \begin{tabular}{c|c}
+      $w_1: f_2 \succ f_1$ & $f_1: \{w_1, w_2\} \succ \{w_1\} \succ \{w_2\}$ \\
+      $w_2: f_1 \succ f_2$ & $f_2: \{w_1, w_2\} \succ \{w_2\} \succ \{w_1\}$
+    \end{tabular}
+  \end{center}
+  Each firm has unit capacity, $\ie \vq[f_1] = \vq[f_2] = 1$, then the firm-optimal stable matching for $I$ is:
+  $$\mu_1 = \{ (w_1, f_1), (w_2, f_2) \}$$
+  Now consider a new instance $I'$ derived from $I$ by increasing the capacity of firm $f_2$ by $1$, $\ie \vq'[f_2] = 2$, then the firm-optimal stable matching for $I'$ is:
+  $$\mu_2 = \{ (w_2, f_1), (w_1, f_2) \}$$
+\end{example}
+
+Observe that $f_2$ prefers $\mu_1$ over $\mu_2$. Thus under \FPDA algorithm, thus a firm with strongly monotone preference (namely $f_2$) can worsen on increasing its capacity.
+
+\section{Can Workers Worsen?}
+
+\begin{proposition}[\cite{gale1985some, roth1990two}]
+  \label{prop:adding-man}
+  Given any one-to-one instance $I = \left< P, Q, \succ \right>$, let $I' = \left< P \cup \{p\}, Q, \succ' \right>$ be another one-to-one instance derived from $I$ by adding the man $p$ such that the new preferences $\succ'$ agree with the old preferences $\succ$ over $P$ and $Q$. Let $\mu_P$ and $\mu_Q$ be the men-optimal and women-optimal stable matchings (respectively) for $I$ and let $\mu'_P$ and $\mu'_Q$ denote the same for $I'$. Then, for every woman $q \in Q$, we have $\mu'_P(q) \succeq'_q \mu_P(q)$ and $\mu'_Q(q) \succeq'_q \mu_Q(q)$.
+\end{proposition}
+
+Increasing the capacity of a firm is equivalent to "adding a man" in the corresponding canonical one-to-one instance (\autoref{sec:canonical-instance}). Due to the increased "competition" among the men, the outcomes of all women (correspondingly the outcome of all worker) weakly improves (Proposition~\ref{prop:adding-man}). Thus under both \WPDA and \FPDA algorithms, the outcome of any worker can never worsen.
+
+\begin{corollary}
+  \label{coro:workers-never-worsen}
+  Let $\mu_W$ and $\mu'_W$ denote the worker-optimal stable matching before and after a firm increases its capacity by $1$, and let $\mu_F$ and $\mu'_F$ be the corresponding firm-optimal stable matching. Then, for all workers $w \in W$, $\mu'_W(w) \succeq'_w \mu_W(w)$ and $\mu'_F(w) \succeq'_w \mu_F(w)$.
+\end{corollary}

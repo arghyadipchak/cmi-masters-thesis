@@ -1,0 +1,125 @@
+\documentclass[oneside,openright,titlepage,numbers=noenddot,headinclude,footinclude=true,cleardoublepage=empty,listof=totoc,paper=a4,fontsize=11pt,english,BCOR=5mm]{scrreprt}
+
+% -----------------------------------------------------------------------------
+%   CONFIGURATION
+% -----------------------------------------------------------------------------
+% Thesis:
+\newcommand{\myTitle}{Capacity Modification for Many-To-One Matching Problems}
+\newcommand{\mySubmissionYear}{2024}
+\newcommand{\mySubmissionMonth}{June}
+
+% Myself:
+\newcommand{\myFirstName}{Arghyadip}
+\newcommand{\myLastName}{Chakraborty}
+\newcommand{\myWebsite}{https://arghyac.com}
+
+% Supervisor:
+\newcommand{\myProfTitle}{Prof.}
+\newcommand{\myProfFirstName}{Prajakta}
+\newcommand{\myProfLastName}{Nimbhorkar}
+\newcommand{\myProfWebsite}{https://www.cmi.ac.in/~prajakta/}
+
+% University:
+\newcommand{\myDepartment}{Department of Computer Science}
+\newcommand{\myUni}{Chennai Mathematical Institute}
+\newcommand{\myUniWebsite}{https://www.cmi.ac.in}
+
+% -----------------------------------------------------------------------------
+
+\input{classicthesis-config}
+\usepackage[margin=1.25in]{geometry}
+\usepackage{amsthm}
+\usepackage{tcolorbox}
+\usepackage{xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{example}{Example}
+
+\newtheoremstyle{colon}%
+{}
+{}
+{\itshape}%bodyfont
+{}%indent
+{\bfseries}%headfont
+{ :}%head punctuation
+{ }%space after head
+{}
+\theoremstyle{colon}
+\newtheorem*{pinput}{Input}
+\newtheorem*{question}{Question}
+
+\newcommand{\vc}{\boldsymbol{c}}
+\newcommand{\vq}{\boldsymbol{q}}
+\newcommand{\vr}{\boldsymbol{r}}
+\newcommand{\vv}{{\boldsymbol{v}}}
+\newcommand{\vx}{\boldsymbol{x}}
+\newcommand{\vy}{\boldsymbol{y}}
+\newcommand{\vz}{\boldsymbol{z}}
+
+\newcommand{\WPDA}{\textbf{WPDA}\xspace}
+\newcommand{\FPDA}{\textbf{FPDA}\xspace}
+
+\newcommand{\MinSumSP}{\textsc{MinSumSP}\xspace}
+\newcommand{\MinMaxSP}{\textsc{MinMaxSP}\xspace}
+\newcommand{\MinSumCSP}{\textsc{MinSumCSP}\xspace}
+\newcommand{\MinMaxCSP}{\textsc{MinMaxCSP}\xspace}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicreturn}{\textbf{Return}}
+
+\addbibresource{library.bib}
+
+\begin{document}
+
+\frenchspacing
+\raggedbottom
+\selectlanguage{english}
+
+\pagestyle{plain}
+\pagenumbering{roman}
+
+\singlespacing
+\input{text/title}
+
+\chapter*{Abstract}
+\input{text/abstract}
+
+\onehalfspacing
+\input{text/contents}
+
+\cleardoublepage
+\pagestyle{scrheadings}
+\pagenumbering{arabic}
+\onehalfspacing
+
+\chapter{Introduction}
+\label{chap:Introduction}
+\input{text/ch1}
+
+\chapter{Preliminaries}
+\label{chap:Preliminaries}
+\input{text/ch2}
+
+\chapter{Impact of Capacity Modification}
+\label{chap:Impact-of-Capacity-Modification}
+\input{text/ch3}
+
+\chapter{Optimal Capacity Modification}
+\label{chap:Optimal-Capacity-Modification}
+\input{text/ch4}
+
+\chapter{Our Contribution}
+\label{chap:Our-Contribution}
+\input{text/ch5}
+
+\cleardoublepage
+\appendix
+
+\singlespacing
+\input{text/bibliography}
+\cleardoublepage
+
+\end{document}

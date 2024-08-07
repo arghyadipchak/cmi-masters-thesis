@@ -1,0 +1,111 @@
+In this chapter, we investigate some questions that emerged while reviewing the last two chapters. We will see how the existing ways can be extended to tackle more realistic challenges, which take more parameters and constraints into account.
+
+\section{Question 1}
+
+\textit{What if there is a bound on the capacity increase scale, say $\kappa\%$ of the initial value?} Formally:
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a capacity increase scale bound $\kappa \in \mathbb{R}$
+\end{pinput}
+\begin{question}
+  Is there a capacity increase scale $\alpha$ with $\alpha \leq \kappa$ st. $I' = \left< W, F, \succ, \vq + \lfloor \alpha \vq \rfloor \right>$ admits a stable and perfect matching?
+\end{question}
+
+\begin{algorithm}
+  \caption{Binary search on $[0, \kappa]$}
+  \label{algo:Bin-Search-alpha}
+  \begin{algorithmic}
+    \REQUIRE MM Instance $I$, capacity increase scale bound $\kappa$, error bound $\epsilon$
+    \STATE Set $low := 0, high := \kappa, \alpha := 0$
+    \WHILE{$high - low > \epsilon$}
+    \STATE $\alpha := \frac{low + high}{2}$
+    \STATE $I' := \left< W, F, \succ, \vq + \lfloor \alpha \vq \rfloor \right>$
+    \IF{$I'$ admits a stable and perfect matching}
+    \STATE $low = \alpha$
+    \ELSE
+    \STATE $high = \alpha$
+    \ENDIF
+    \ENDWHILE
+    \RETURN $\alpha$
+  \end{algorithmic}
+\end{algorithm}
+
+The simplest approach is to divide $[0, \kappa]$ into (say) $n$ partitions, and perform a linear search by picking a point in each partition. We can get more accurate values of $\alpha$ by increasing the number of partitions, since the difference between each point gets smaller. A better approach is to use a binary search on $[0, \kappa]$ with an error bound $\epsilon > 0$ (\autoref{algo:Bin-Search-alpha}) or a certain number of rounds $n$. Since checking whether $I'$ admits a stable and perfect matching can be done in linear time using the \textit{Gale-Shapley} algorithm, all of the above approaches run in polynomial time.
+
+\section{Question 2}
+
+\textit{What is each firm has different cost associated to its unit capacity increase?} Formally:
+
+\subsection{\textsc{MinSum Cost-Based Capacities}}
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a cost vector $\vc \in \mathbb{N}^m$, a capacity bound $k^+ \in \mathbb{N}$
+\end{pinput}
+\begin{question}[\MinSumCSP]
+  Is there a capacity increase vector $\vr$ with $|\vc \odot \vr|_1 \leq k^+$ st. $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching?
+\end{question}
+
+If we set $\vc = 1^m$, then the problem reduces to \MinSumSP, which we know is NP-complete (\autoref{th:MinSumSP-NP-complete}). Thus \MinSumCSP is NP-complete. So we try to extend the algorithmic results from \MinSumSP to account for costs.
+
+The Integer Program can be simply extended by changing the optimize function to $\min \sum\limits_{f \in F} \vc[f] \cdot r_f$ while the other constraints remain the same.
+
+\begin{tcolorbox}
+  $$|W| \cdot \sum\limits_{f' | f' \succeq_w f} x_{(w, f')} + \sum\limits_{w' | w' \succ_f w} x_{(w', f)} \geq q[f] + r_f ~\forall (w, f) \in E$$
+  The first constraint of the IP \autoref{tab:ip-minsumsp} (above)  is to ensure that:
+  \begin{itemize}
+    \item either the worker $w$ is assigned to some more preferred firm $f'$, \ie
+          $$\sum\limits_{f' | f' \succeq_w f} x_{(w, f')} = 1$$
+    \item or the firm $f$ is already full with workers more preferred than $w$, \ie
+          $$\sum\limits_{w' | w' \succ_f w} x_{(w', f)} \geq q[f] + r_f$$
+  \end{itemize}
+  $|W|$ is chosen to scale the first term greater than $q[f] + r_f$ and can be conviniently replace by either smaller parameters $\Delta_F$ or $\Delta_f$.
+\end{tcolorbox}
+
+\autoref{algo:MinSumSP-Algorithm} can be used without any change, by accounting for the cost in Lemma~\ref{lem:unassigned-vectors} as follows:
+
+$$OPT = \min\limits_{\vv \in \mathcal{V}'} \left\{ \sum\limits_{f \in F} \vc[f] \cdot (n(f, \vv) + |\hat{\mu}_v(f)| + n_u(f, \vv) - q[f])^+ \right\}$$
+
+This also implies that the approximation and FPT results naturally follow, since they directly use Lemma~\ref{lem:unassigned-vectors}.
+
+\subsection{\textsc{MinMax Cost-Based Capacities}}
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a cost vector $\vc \in \mathbb{N}^m$, a capacity bound $k_{max} \in \mathbb{N}$
+\end{pinput}
+\begin{question}[\MinMaxCSP]
+  Is there a capacity increase vector $\vr$ with $|\vc \odot \vr|_\infty \leq k^{max}$ st. $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching?
+\end{question}
+
+\begin{algorithm}
+  \caption{Algorithm for \MinMaxCSP}
+  \label{algo:MinMaxCSP-Algorithm}
+  \begin{algorithmic}
+    \REQUIRE MM Instance $I$
+    \STATE $r[f] := 0$ for all $f \in F$
+    \STATE $C := 0$
+    \STATE $\mu :=$ worker-optimal stable matching
+    \WHILE{$\mu$ does not match all workers}
+    \STATE $C := C + 1$
+    \STATE $r[f] = \lfloor C / \vc[f] \rfloor$
+    \STATE $\mu :=$ worker-optimal stable matching with capacities $q + r$
+    \ENDWHILE
+    \STATE \textbf{Return} $\mu$
+  \end{algorithmic}
+\end{algorithm}
+
+
+
+Extending \autoref{algo:MinMaxSP-Algorithm} for \MinMaxCSP is quite easy. In each itertion of the while loop, instead of increasing each firm's capacity, we increase the total cost by 1 and set the firms' capacities accordingly. Checking whether $I'$ admits a stable and perfect matching can be done in linear time, and thus \autoref{algo:MinMaxCSP-Algorithm} solves for \MinMaxCSP in polynomial time. Note that if $gcd(\vc) = \gcd \{ \vc[f_1], \vc[f_2], ..., \vc[f_m] \} \neq 1$, then \autoref{algo:MinMaxCSP-Algorithm} can complete faster by updating $C := C + \gcd(\vc)$ in each iteration.
+
+\section{Question 3}
+
+\textit{What if we want to match some $k$-subset of unmatched workers?} Formally:
+
+\begin{pinput}
+  A MM Instance $I = \left< W, F, \succ, \vq \right>$, a $k$-subset $W' \subseteq W_u$ of unmatched workers, a capacity bound $k^+ \in \mathbb{N}$
+\end{pinput}
+\begin{question}
+  Is there a capacity increase vector $\vr$ with $|\vr|_1 \leq k^+$ st. $I' = \left< W, F, \succ, \vq + \vr \right>$ admits a stable and perfect matching which matches every worker in $W'$?
+\end{question}
+
+The above problem is similary NP-complete, as choosing $W' = W_{un}$ makes it equivalent to \MinSumSP. We can modify \autoref{algo:MinSumSP-Approx} by setting $L := W'$ to solve for above problem, giving us a $\lceil |W'|/c \rceil$-approximation algorithm for any constant $c$. Similary, it is also FPT wrt. ($|W'|, \Delta_u$).

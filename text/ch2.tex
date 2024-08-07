@@ -1,0 +1,102 @@
+For any positive integer $r \in \mathbb{N}$, let $[r] := \{ 1, 2, ..., r \}$. Given two integer vectors of $\vx, \vy$ of dimention $t$, \ie $\vx, \vy \in \mathbb{Z}^t$:
+
+\begin{itemize}
+  \item we write $\vx \leq \vy$ iff $\vx[i] \leq \vy[i]$ for all $i \in [t]$
+  \item $\vx + \vy$ denotes the addition vector $\vz$, \ie $\vz[i] = \vx[i] + \vy[i]$ for all $i \in [t]$
+  \item $\vx \odot \vy$ denotes the element-wise product vector $\vz$, \ie $\vz[i] = \vx[i] \cdot \vy[i]$ for all $i \in [t]$
+  \item $\lfloor \vx \rfloor$ denotes the element-wise floor vector, \ie $\lfloor \vx \rfloor [i] = \lfloor \vx[i] \rfloor$ for all $i \in [t]$
+  \item $|\vx|_1$ denotes the $L_1$ norm of $\vx$, \ie $|\vx|_1 = \sum\limits_{i \in [t]} \vx[i]$
+  \item $|\vx|_\infty$ denotes the $L_\infty$ norm of $\vx$, \ie $|\vx|_\infty = \max\limits_{i \in [t]} \vx[i]$
+\end{itemize}
+
+A \textit{preference list} (or \textit{priority order}) $\succ$ over a set $A$ is a linear order over $A$. We say that $a$ is preferred to $b$ if $a \succ b$.
+
+\section{Many-To-One Matching Problem}
+
+The \textsc{Many-To-One} Matching (MM) problem has as input:
+\begin{itemize}
+  \item[$\blacktriangleright$] A set $W = \{ w_1, w_2, ..., w_n \}$ of $n \in \mathbb{N}$ workers
+  \item[$\blacktriangleright$] A set $F = \{ f_1, f_2, ..., f_m \}$ of $m \in \mathbb{N}$ firms
+  \item[$\blacktriangleright$] For each worker $w \in W$, a \textit{preference list} $\succ_w$ over a subset of firms
+  \item[$\blacktriangleright$] For each firm $f \in F$, a \textit{priority order} $\succ_f$ over a subset of workers
+  \item[$\blacktriangleright$] A capacity vector $\vq \in \mathbb{N}^m$ which specifies the maximum number of workers allowed to be assigned to each firm
+\end{itemize}
+
+Thus an instance of the many-to-one matching problem is given by a tuple $\left< W, F, \succ, \vq \right>$, where $\succ = (\succ_x)_{x \in W \cup F}$. When all firms have unit capacities, \ie $\vq = 1^m$, the problem becomes a one-to-one matching problem. In that case, we will follow the man-woman terminology, and denote a problem instance by $\left< P, Q, \succ \right>$ where $P$ and $Q$ denote the set of $n$ \textit{men} and $m$ \textit{women} respectively, and $\succ$ denotes the corresponding preferences.
+
+Throughtout, we will use the term \textit{agent} to refer to a worker or a firm, \ie an element in the set $W \cup F$. For each worker $x \in W$ (resp. firm $x \in F$), let $A(x)$ denote the set of firm acceptable to worker $x$ (resp. all workers in firm $x$'s priority order). We assume no worker (resp. no firm) has an empty preference list (resp. priority order), since such agents can be ignored or removed from the problem instance without any effect. Note that we also assume that a worker $w$ is \textit{acceptable} to a firm $f$ iff $f$ is \textit{acceptable} to $w$, otherwise such acceptances can be removed similarly. We can also model the acceptability relations with a bipartite graph $G = \left< W, F; E \right>$, where $E$ is the set of all pairs $(w, f)$ such that $w$ and $f$ find each other acceptable.
+
+\section{Responsive Preferences}
+
+The extension of a firm $f$'s preference $\succ_f$ over subsets of workers is said to be \textit{responsive} if for any subset $S \subseteq A(f)$ of workers:
+\begin{itemize}
+  \item for all $w \in A(f) \setminus S, S \cup \{w\} \succ_f S$
+  \item for all $w, w' \in A(f) \setminus S, S \cup \{w\} \succ_f S \cup \{w'\}$ iff $w \succ_f w'$
+  \item $\succ_f$ is transitive
+\end{itemize}
+
+Thus, $\succ_f$ induces a partial order over the set of all subsets of acceptable workers. Throughout, we will assume that all firms have \textit{responsive} preferences over subsets of workers. We will also define two subdomains of responsive preferences that are of interest to us:
+
+\begin{description}
+  \item[Strongly Monotone] A firm $f$ has \textit{strongly monotone} preferences if it prefers cardinality-wise larger subsets of workers, \ie for any $S, T \subseteq A(f)$, $S \succ_f T$ if $|S| > |T|$
+  \item[Lexicographic] A firm $f$ has \textit{lexicographic} preferences if it prefers any subset of workers containing its favourite worker over any subset not containing it, subject to which, it prefers any subset containing its second-favourite worker over any subset not containing it, and so on. Formally, for any $S, T \subseteq A(f)$, $S \succ_f T$ if the most preferred worker (to $\succ_f$) in $S \Delta T$ is in $S$
+\end{description}
+
+\newpage
+
+\section{Matching}
+
+Given a MM Instance $I = \left< W, F, \succ, \vq \right>$, a matching $\mu : W \rightharpoonup F$ is a (partial) map such that:
+
+\begin{itemize}
+  \item each worker $w \in W$ is either unmatched, \ie $\mu(w)$ is undefined, or matched to an acceptable firm, \ie $\mu(w) \in A(w)$
+  \item each firm $f$ is matched with at most $\vq[f]$ workers, \ie $|\mu^{-1}(f)| \leq \vq[f]$
+\end{itemize}
+
+Firms which are assigned less workers than their capacity are called \textit{under-filled} or \textit{under-subscribed}. A matching is said to be \textit{perfect} is every worker is matched under it.
+
+We say an worker $w \in W$ \textit{weakly prefers} a matching $\mu$ to a matching $\sigma$ if either $\mu(w) = \sigma(w)$ or $\mu(w) \succ_w \sigma(w)$. Similarly, a firm $f \in F$ \textit{weakly prefers} a matching $\mu$ to a matching $\sigma$ if either $\mu^{-1}(w) = \sigma^{-1}(w)$ or $\mu^{-1}(w) \succ_f \sigma^{-1}(w)$. Matching $\mu$ is called a \textit{worker-optimal} (resp. \textit{firm-optimal}) stable matching if every worker (resp. every firm) weakly prefers $\mu$ to all other stable matchings.
+
+\section{Stability \& Gale-Shapley Algorithm}
+
+A matching $\mu$ is said to be blocked by a worker-firm pair $(w, f)$ if:
+\begin{itemize}
+  \item $\mu(w) = \bot$ or $f \succ_w \mu(w)$
+  \item $\exists S \subseteq \mu^{-1}(f)$ st. $S \cup \{w\} \succ_f \mu^{-1}(f)$ and $|S \cup \{w\}| \leq q[f]$
+\end{itemize}
+
+A matching is said to be \textit{stable} if it is not blocked by any such worker-firm pairs. The set of stable matchings for a MM Instance $I$ is noted by $S_I$.
+
+The \textit{Gale-Shapley} algorithm \cite{gale1962college}, also know as the \textit{deferred-acceptance} algorithm, is the well-known method to find a stable matching. As the name suggests, one of the set is chosen to be proposing and each round an unmatched agent from the set \textit{proposes} to their \textit{most preferred} agent(s) on the other set. Agents from the other set accept their \textit{most preferred} proposal(s) yet, and reject the others. Note that there cannot be more than $|E|$ proposals, thus the algorithm takes linear time in terms of input ($E$) size.
+
+Depending on whether the workers propose (worker-proposing deferred-acceptance or \textbf{WPDA}) or the firms propose (firm-proposing deferred-acceptance or \textbf{FPDA}), the outcome is a worker-optimal or a firm-optimal stable matching respectively.
+
+\begin{proposition}[Worker-optimal and Firm-optimal stable matchings \cite{roth1984evolution}]
+  Given any instance $I$, there exist (no necessarily distinct) stable matchings $\mu_W, \mu_F \in S_I$ such that for every stable matching $\mu \in S_I, \mu_W(w) \succ_w \mu(w) \succ_w \mu_F(w)$ for every worker $w \in W$ and $\mu_F(f) \succ_f \mu(f) \succ_f \mu_W(f)$ for every firm $f \in F$.
+\end{proposition}
+
+\section{Canonical One-to-One Instance}
+\label{sec:canonical-instance}
+
+Given a many-to-one instance $I = \left< W, F, \succ, \vq \right>$ with responsive preferences, there exists an associated one-to-one instance $I' = \left< P, Q, \succ \right>$ obtained by creating $\vq[f]$ men for each firm $f$ and one woman for each worker $w$. Each man's preferences for the women mirror the corresponding firm's preferences for the corresponding workers. Each woman prefers all men corresponding to a more preferred firm over all men corresponding to any less preferred firm (in accordance with the corresponding worker's preferences). For any fixed firm, all women prefer the man corresponding to its first copy over the man representing its second copy, and so on. Any stable matching in the one-to-one instance $I'$ maps to a unique stable matching in the many-to-one instance $I$, obtained by "compressing" the former matching in a natural way.
+
+\begin{proposition}[Canonical one-to-one instance \cite{gale1985some}]
+  Given any many-to-one instance $I = \left< W, F, \succ, \vq \right>$, there exists a one-to-one instance $I' = \left< P, Q, \succ \right>$ such that there is a bijection between the stable matchings of $I$ and $I'$. Furthermore, the instance $I'$ can be constructed in polynomial time.
+\end{proposition}
+
+\section{Rural Hospitals Theorem}
+
+The \textit{rural hospitals theorem} is a well-know result for many-to-one stable matchings. It states that, for any fixed firm $f$, the number of workers matched with $f$ is the same in every stable matching \cite{roth1984evolution}. Furthermore, if $f$ is \textit{under-filled} in any stable matching, then it is matched with the same set of workers in every stable matching \cite{roth1986allocation}.
+
+\begin{proposition}[Rural Hospitals theorem \cite{roth1984evolution, roth1986allocation}]
+  Given any instance $I$, any firm $f$, and any pair of stable matchings $\mu, \mu' \in S_I$, we have that $|\mu^{-1}(f)| = |\mu'^{-1}(f)|$. Furthermore, if $|\mu^{-1}(f)| < q[f]$ for some stable matching $\mu \in S_I$, then $\mu^{-1}(f) = \mu'^{-1}(f)$ for every stable matching $\mu' \in S_I$
+\end{proposition}
+
+Thus given a MM instance, all stable matchings match the same set of workers and firms. We denote the set of all assigned and unassigned workers in a stable matching by $W_a$ and $W_u$ respectively. We also use the following notations:
+
+\begin{tabular}{c L{4in}}
+  $\Delta_x = |A(x)|$                                 & length of the preference list of agent $x \in W \cup F$        \\
+  $\Delta_u = \max\limits_{w \in W_u} \{ \Delta_w \}$ & length of the longest preference list among unassigned workers \\
+  $\Delta_W = \max\limits_{w \in W} \{ \Delta_w \}$   & length of the longest preference list among all workers        \\
+  $\Delta_F = \max\limits_{f \in F} \{ \Delta_f \}$   & length of the longest preference list among all firms
+\end{tabular}
